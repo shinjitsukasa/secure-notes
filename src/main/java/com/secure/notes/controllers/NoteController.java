@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notes")
@@ -17,11 +18,13 @@ public class NoteController {
     private NoteService noteService;
 
     @PostMapping
-    public Note createNote(@RequestBody String title, String content,
-                           @AuthenticationPrincipal UserDetails userDetails) {
+    public Note createNote(@RequestBody Map<String, String> requestBody,
+                        @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
+        String title = requestBody.get("title");
+        String content = requestBody.get("content");
         System.out.println("USER DETAILS: " + username);
-        return noteService.createNoteForUser(username, title, content);
+        return noteService.createNoteForUser(username, content, title);
     }
 
     @GetMapping
@@ -33,11 +36,13 @@ public class NoteController {
 
     @PutMapping("/{noteId}")
     public Note updateNote(@PathVariable Long noteId,
-                           @RequestBody String title, String content,
-                           @AuthenticationPrincipal UserDetails userDetails) {
+                       @RequestBody Map<String, String> requestBody,
+                       @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        return noteService.updateNoteForUser(noteId, title, content, username);
-    }
+        String title = requestBody.get("title");
+        String content = requestBody.get("content");
+    return noteService.updateNoteForUser(noteId, title, content, username);
+}
 
     @DeleteMapping("/{noteId}")
     public void deleteNote(@PathVariable Long noteId, String title,

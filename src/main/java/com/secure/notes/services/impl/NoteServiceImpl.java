@@ -33,8 +33,8 @@ public class NoteServiceImpl implements NoteService {
     public Note updateNoteForUser(Long noteId, String title, String content, String username) {
         Note note = noteRepository.findById(noteId).orElseThrow(()
                 -> new RuntimeException("Note not found"));
-        note.setContent(content);
         note.setTitle(title);
+        note.setContent(content);
         note.setOwnerUsername(username);
         Note updatedNote = noteRepository.save(note);
         auditLogService.logNoteUpdate(username, note, title);
