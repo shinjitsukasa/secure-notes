@@ -17,6 +17,7 @@ public class AuditLog {
     private String action;
     private String username;
     private Long noteId;
+    private String noteTitle;
     private String noteContent;
     private LocalDateTime timestamp;
 }

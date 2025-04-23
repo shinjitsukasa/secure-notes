@@ -17,33 +17,36 @@ public class AuditLogServiceImpl implements AuditLogService {
     AuditLogRepository auditLogRepository;
 
     @Override
-    public void logNoteCreation(String username, Note note){
+    public void logNoteCreation(String username, Note note, String title){
         AuditLog log = new AuditLog();
         log.setAction("CREATE");
         log.setUsername(username);
         log.setNoteId(note.getId());
+        log.setNoteTitle(title);
         log.setNoteContent(note.getContent());
         log.setTimestamp(LocalDateTime.now());
         auditLogRepository.save(log);
     }
 
     @Override
-    public void logNoteUpdate(String username, Note note){
+    public void logNoteUpdate(String username, Note note, String title){
         AuditLog log = new AuditLog();
         log.setAction("UPDATE");
         log.setUsername(username);
         log.setNoteId(note.getId());
+        log.setNoteTitle(title);
         log.setNoteContent(note.getContent());
         log.setTimestamp(LocalDateTime.now());
         auditLogRepository.save(log);
     }
 
     @Override
-    public void logNoteDeletion(String username, Long noteId){
+    public void logNoteDeletion(String username, Long noteId, String title){
         AuditLog log = new AuditLog();
         log.setAction("DELETE");
         log.setUsername(username);
         log.setNoteId(noteId);
+        log.setNoteTitle(title);
         log.setTimestamp(LocalDateTime.now());
         auditLogRepository.save(log);
     }

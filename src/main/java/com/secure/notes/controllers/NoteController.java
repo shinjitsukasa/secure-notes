@@ -40,9 +40,9 @@ public class NoteController {
     }
 
     @DeleteMapping("/{noteId}")
-    public void deleteNote(@PathVariable Long noteId,
+    public void deleteNote(@PathVariable Long noteId, String title,
                            @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        noteService.deleteNoteForUser(noteId, username);
+        noteService.deleteNoteForUser(noteId, username, title);
     }
 }

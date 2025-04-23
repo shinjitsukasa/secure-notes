@@ -9,7 +9,7 @@ public interface NoteService {
 
     Note updateNoteForUser(Long noteId, String title, String content, String username);
 
-    void deleteNoteForUser(Long noteId, String username);
+    void deleteNoteForUser(Long noteId, String username, String title);
 
     List<Note> getNotesForUser(String username);
 }
