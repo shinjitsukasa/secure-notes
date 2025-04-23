@@ -5,7 +5,7 @@ import com.secure.notes.models.Note;
 import java.util.List;
 
 public interface NoteService {
-    Note createNoteForUser(String username, String content, String title);
+    Note createNoteForUser(String username, String title, String content);
 
     Note updateNoteForUser(Long noteId, String title, String content, String username);
 
