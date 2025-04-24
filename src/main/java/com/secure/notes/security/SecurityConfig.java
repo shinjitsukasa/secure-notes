@@ -55,8 +55,8 @@ public class SecurityConfig {
                 userRepository.save(user1);
             }
             
-            if (!userRepository.existsByUserName("admin")) {
-                User admin = new User("admin", "admin@example.com", "{noop}adminPass");
+            if (!userRepository.existsByUserName("admin2")) {
+                User admin = new User("admin2", "admin2@example.com", "{noop}adminPass");
                 admin.setAccountNonLocked(true);
                 admin.setAccountNonExpired(true);
                 admin.setCredentialsNonExpired(true);
