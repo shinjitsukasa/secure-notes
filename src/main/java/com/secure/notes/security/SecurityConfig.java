@@ -27,7 +27,6 @@ import org.springframework.boot.CommandLineRunner;
 // @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
-
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((requests)
@@ -36,7 +35,8 @@ public class SecurityConfig {
 					 .requestMatchers("/api/notes/**").hasAnyRole("USER", "ADMIN")
 					 .anyRequest().authenticated());
         http.csrf(AbstractHttpConfigurer::disable);
-        // http.addFilterBefore(customLoggingFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new CustomLoggingFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(new RequestValidationFilter(), CustomLoggingFilter.class);
         //http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();
