@@ -4,11 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import com.secure.notes.models.AppRole;
 import com.secure.notes.models.Role;
@@ -24,20 +23,19 @@ import org.springframework.boot.CommandLineRunner;
 
 @Configuration
 @EnableWebSecurity
-// @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+// @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true,
+// jsr250Enabled = true)
 public class SecurityConfig {
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((requests)
-                -> requests
-					 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-					 .requestMatchers("/api/notes/**").hasAnyRole("USER", "ADMIN")
-					 .anyRequest().authenticated());
-        http.csrf(AbstractHttpConfigurer::disable);
-        http.addFilterBefore(new CustomLoggingFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterAfter(new RequestValidationFilter(), CustomLoggingFilter.class);
-        //http.formLogin(withDefaults());
+        http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringRequestMatchers("/api/auth/public/**"));
+        http.authorizeHttpRequests((requests) -> requests
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/csrf-token").permitAll()
+                .requestMatchers("/api/notes/**").hasAnyRole("USER", "ADMIN")
+                .anyRequest().authenticated());
+        http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();
     }
@@ -47,8 +45,9 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-	 @Bean
-    public CommandLineRunner initData(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    @Bean
+    public CommandLineRunner initData(RoleRepository roleRepository, UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
         return args -> {
             Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
                     .orElseGet(() -> roleRepository.save(new Role(AppRole.ROLE_USER)));
@@ -69,7 +68,7 @@ public class SecurityConfig {
                 user1.setRole(userRole);
                 userRepository.save(user1);
             }
-            
+
             if (!userRepository.existsByUserName("admin")) {
                 User admin = new User("admin", "admin@example.com", passwordEncoder.encode("adminPass"));
                 admin.setAccountNonLocked(true);
