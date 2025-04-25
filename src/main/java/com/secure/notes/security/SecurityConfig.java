@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.secure.notes.models.AppRole;
 import com.secure.notes.models.Role;
@@ -25,6 +26,8 @@ import org.springframework.boot.CommandLineRunner;
 @EnableWebSecurity
 // @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
+
+
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((requests)
@@ -33,6 +36,7 @@ public class SecurityConfig {
 					 .requestMatchers("/api/notes/**").hasAnyRole("USER", "ADMIN")
 					 .anyRequest().authenticated());
         http.csrf(AbstractHttpConfigurer::disable);
+        // http.addFilterBefore(customLoggingFilter, UsernamePasswordAuthenticationFilter.class);
         //http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();
@@ -54,7 +58,7 @@ public class SecurityConfig {
 
             if (!userRepository.existsByUserName("user1")) {
                 User user1 = new User("user1", "user1@example.com", passwordEncoder.encode("password1"));
-                user1.setAccountNonLocked(false);
+                user1.setAccountNonLocked(true);
                 user1.setAccountNonExpired(true);
                 user1.setCredentialsNonExpired(true);
                 user1.setEnabled(true);
