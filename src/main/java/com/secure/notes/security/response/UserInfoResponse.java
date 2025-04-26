@@ -22,8 +22,8 @@ public class UserInfoResponse {
     private List<String> roles;
 
     public UserInfoResponse(Long id, String username, String email, boolean accountNonLocked, boolean accountNonExpired,
-                            boolean credentialsNonExpired, boolean enabled, LocalDate credentialsExpiryDate,
-                            LocalDate accountExpiryDate, boolean isTwoFactorEnabled, List<String> roles) {
+            boolean credentialsNonExpired, boolean enabled, LocalDate credentialsExpiryDate,
+            LocalDate accountExpiryDate, boolean isTwoFactorEnabled, List<String> roles) {
         this.id = id;
         this.username = username;
         this.email = email;
