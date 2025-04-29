@@ -21,7 +21,7 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public Note createNoteForUser(String username, String content, String title) {
         Note note = new Note();
-        note.setTitle(content);
+        note.setTitle(title); // Correctly set the title
         note.setContent(content);
         note.setOwnerUsername(username);
         Note savedNote = noteRepository.save(note);

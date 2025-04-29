@@ -12,7 +12,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notes")
-// @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600, allowCredentials = "true")
+// @CrossOrigin(
+//     origins = "http://localhost:3000", // Allow React frontend
+//     allowedHeaders = {"Authorization", "Content-Type", "X-XSRF-TOKEN"}, // Allow custom headers
+//     allowCredentials = "true" // Allow cookies and credentials
+// )
 public class NoteController {
 
     @Autowired
@@ -23,7 +27,7 @@ public class NoteController {
                         @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         String title = requestBody.get("title");
-        String content = requestBody.get("content");
+        String content = requestBody.get("content"); // Ensure content is correctly retrieved
         System.out.println("USER DETAILS: " + username);
         return noteService.createNoteForUser(username, content, title);
     }

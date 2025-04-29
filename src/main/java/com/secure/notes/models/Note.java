@@ -9,10 +9,15 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Column;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Getter
+@Setter
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

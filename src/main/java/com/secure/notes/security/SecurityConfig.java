@@ -2,6 +2,7 @@ package com.secure.notes.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,8 +25,10 @@ import com.secure.notes.security.jwt.AuthTokenFilter;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 
 @Configuration
@@ -33,6 +36,9 @@ import org.springframework.boot.CommandLineRunner;
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true,
 jsr250Enabled = true)
 public class SecurityConfig {
+    
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
@@ -45,16 +51,25 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/auth/**"));
+                .ignoringRequestMatchers("/api/auth/public/**"));
         http.authorizeHttpRequests((requests) -> requests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all OPTIONS requests
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/notes", "/api/notes/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/csrf-token").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/public/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()
                 .anyRequest().authenticated());
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler));
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.cors(cors -> cors.configurationSource(request -> {
+            org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
+            config.setAllowedOrigins(List.of(frontendUrl)); // Allow frontend origin
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allow HTTP methods
+            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN")); // Allow required headers
+            config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN")); // Expose headers if needed
+            config.setAllowCredentials(true); // Allow credentials (cookies, etc.)
+            return config;
+        }));
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();
