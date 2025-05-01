@@ -36,6 +36,7 @@ import com.secure.notes.security.response.LoginResponse;
 import com.secure.notes.security.response.MessageResponse;
 import com.secure.notes.security.response.UserInfoResponse;
 import com.secure.notes.services.UserService;
+import com.secure.notes.util.AuthUtil;
 
 import jakarta.validation.Valid;
 
@@ -62,8 +63,8 @@ public class AuthController {
 	@Autowired
 	UserService userService;
 
-	// @Autowired
-	// AuthUtil authUtil;
+	@Autowired
+	AuthUtil authUtil;
 
 	@PostMapping("/public/signin")
 	public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -167,5 +168,16 @@ public class AuthController {
         );
 
         return ResponseEntity.ok().body(response);
+    }
+
+	 @GetMapping("/user/2fa-status")
+    public ResponseEntity<?> get2FAStatus() {
+        User user = authUtil.loggedInUser();
+        if (user != null){
+            return ResponseEntity.ok().body(Map.of("is2faEnabled", user.isTwoFactorEnabled()));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User not found");
+        }
     }
 }

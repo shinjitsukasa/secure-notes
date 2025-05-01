@@ -12,11 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notes")
-// @CrossOrigin(
-//     origins = "http://localhost:3000", // Allow React frontend
-//     allowedHeaders = {"Authorization", "Content-Type", "X-XSRF-TOKEN"}, // Allow custom headers
-//     allowCredentials = "true" // Allow cookies and credentials
-// )
 public class NoteController {
 
     @Autowired
