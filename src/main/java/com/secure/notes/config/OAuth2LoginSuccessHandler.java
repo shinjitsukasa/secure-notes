@@ -47,7 +47,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
-        String githubEmail = null;
+        String fakeEmail = null;
         OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken) authentication;
         if ("github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()) || "google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
             DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
@@ -59,7 +59,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                 idAttributeKey = "id";
                 if (tempEmail.isBlank()) {
                     tempEmail = username + "@github.com";
-                    githubEmail = tempEmail;
+                    fakeEmail = tempEmail;
                 }
             } else if ("google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
                 username = tempEmail.split("@")[0];
@@ -124,7 +124,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                 .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
                 .collect(Collectors.toList()));
                 
-        String emailToFind = "github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()) ? githubEmail : email;
+        String emailToFind = "github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()) ? fakeEmail : email;
         User user = userService.findByEmail(emailToFind).orElseThrow(
             () -> new RuntimeException("User not found"));
         authorities.add(new SimpleGrantedAuthority(user.getRole().getRoleName().name()));
