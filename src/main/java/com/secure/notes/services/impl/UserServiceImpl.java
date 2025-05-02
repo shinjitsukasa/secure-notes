@@ -3,16 +3,14 @@ package com.secure.notes.services.impl;
 import com.secure.notes.dtos.UserDTO;
 import com.secure.notes.models.AppRole;
 import com.secure.notes.models.PasswordResetToken;
-// import com.secure.notes.models.PasswordResetToken;
 import com.secure.notes.models.Role;
 import com.secure.notes.models.User;
 import com.secure.notes.repositories.PasswordResetTokenRepository;
-// import com.secure.notes.repositories.PasswordResetTokenRepository;
 import com.secure.notes.repositories.RoleRepository;
 import com.secure.notes.repositories.UserRepository;
-// import com.secure.notes.services.TotpService;
 import com.secure.notes.services.UserService;
-// import com.secure.notes.util.EmailService;
+import com.secure.notes.util.EmailService;
+
 // import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +41,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
 
-    // @Autowired
-    // EmailService emailService;
+    @Autowired
+    EmailService emailService;
 
     // @Autowired
     // TotpService totpService;
@@ -163,7 +161,7 @@ public class UserServiceImpl implements UserService {
 
         String resetUrl = frontendUrl + "/reset-password?token=" + token;
         // Send email to user
-        // emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
+        emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
     }
 
 
