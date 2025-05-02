@@ -47,25 +47,31 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
+        String githubEmail = null;
         OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken) authentication;
         if ("github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()) || "google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
             DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
             Map<String, Object> attributes = principal.getAttributes();
-            String email = Objects.toString(attributes.get("email"), "");
+            String tempEmail = Objects.toString(attributes.get("email"), "");
             String name = Objects.toString(attributes.get("name"), "");
             if ("github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
                 username = Objects.toString(attributes.get("login"), "");
                 idAttributeKey = "id";
+                if (tempEmail.isBlank()) {
+                    tempEmail = username + "@github.com";
+                    githubEmail = tempEmail;
+                }
             } else if ("google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
-                username = email.split("@")[0];
+                username = tempEmail.split("@")[0];
                 idAttributeKey = "sub";
             } else {
                 username = "";
                 idAttributeKey = "id";
             }
-            System.out.println("HELLO OAUTH: " + email + " : " + name + " : " + username);
+            final String emailTemp = tempEmail;
+            System.out.println("HELLO OAUTH: " + emailTemp + " : " + name + " : " + username);
 
-            userService.findByEmail(email)
+            userService.findByEmail(emailTemp)
                     .ifPresentOrElse(user -> {
                         DefaultOAuth2User oauthUser = new DefaultOAuth2User(
                                 List.of(new SimpleGrantedAuthority(user.getRole().getRoleName().name())),
@@ -87,7 +93,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                             // Handle the case where the role is not found
                             throw new RuntimeException("Default role not found");
                         }
-                        newUser.setEmail(email);
+                        newUser.setEmail(emailTemp);
                         newUser.setUserName(username);
                         newUser.setSignUpMethod(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
                         userService.registerUser(newUser);
@@ -117,8 +123,10 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         Set<SimpleGrantedAuthority> authorities = new HashSet<>(oauth2User.getAuthorities().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
                 .collect(Collectors.toList()));
-        User user = userService.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("User not found"));
+                
+        String emailToFind = "github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()) ? githubEmail : email;
+        User user = userService.findByEmail(emailToFind).orElseThrow(
+            () -> new RuntimeException("User not found"));
         authorities.add(new SimpleGrantedAuthority(user.getRole().getRoleName().name()));
 
         // Create UserDetailsImpl instance
