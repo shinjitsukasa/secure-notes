@@ -51,10 +51,10 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         if ("github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()) || "google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
             DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
             Map<String, Object> attributes = principal.getAttributes();
-            String email = attributes.getOrDefault("email", "").toString();
-            String name = attributes.getOrDefault("name", "").toString();
+            String email = Objects.toString(attributes.get("email"), "");
+            String name = Objects.toString(attributes.get("name"), "");
             if ("github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
-                username = attributes.getOrDefault("login", "").toString();
+                username = Objects.toString(attributes.get("login"), "");
                 idAttributeKey = "id";
             } else if ("google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
                 username = email.split("@")[0];
@@ -111,7 +111,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         Map<String, Object> attributes = oauth2User.getAttributes();
 
         // Extract necessary attributes
-        String email = (String) attributes.get("email");
+        String email = Objects.toString(attributes.get("email"), "");
         System.out.println("OAuth2LoginSuccessHandler: " + username + " : " + email);
 
         Set<SimpleGrantedAuthority> authorities = new HashSet<>(oauth2User.getAuthorities().stream()
