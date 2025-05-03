@@ -48,22 +48,30 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
         OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken) authentication;
-        if ("github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()) || "google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
+        String provider = oAuth2AuthenticationToken.getAuthorizedClientRegistrationId();
+        if ("github".equals(provider) || "google".equals(provider) || "apple".equals(provider) || "facebook".equals(provider)) {
             DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
             Map<String, Object> attributes = principal.getAttributes();
             String email = attributes.getOrDefault("email", "").toString();
             String name = attributes.getOrDefault("name", "").toString();
-            if ("github".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
+            if ("github".equals(provider)) {
                 username = attributes.getOrDefault("login", "").toString();
                 idAttributeKey = "id";
-            } else if ("google".equals(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId())) {
+            } else if ("google".equals(provider)) {
                 username = email.split("@")[0];
                 idAttributeKey = "sub";
+            // } else if ("apple".equals(provider)) {
+            //     // Apple may not always provide email/name, handle accordingly
+            //     username = attributes.getOrDefault("email", "apple_user").toString().split("@")[0];
+            //     idAttributeKey = "sub";
+            } else if ("facebook".equals(provider)) {
+                username = attributes.getOrDefault("name", "facebook_user").toString().replaceAll("\\s+", "").toLowerCase();
+                idAttributeKey = "id";
             } else {
                 username = "";
                 idAttributeKey = "id";
             }
-            System.out.println("HELLO OAUTH: " + email + " : " + name + " : " + username);
+            System.out.println("HELLO OAUTH: " + email + " : " + name + " : " + username + " : " + provider);
 
             userService.findByEmail(email)
                     .ifPresentOrElse(user -> {
@@ -84,12 +92,11 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                         if (userRole.isPresent()) {
                             newUser.setRole(userRole.get()); // Set existing role
                         } else {
-                            // Handle the case where the role is not found
                             throw new RuntimeException("Default role not found");
                         }
                         newUser.setEmail(email);
                         newUser.setUserName(username);
-                        newUser.setSignUpMethod(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
+                        newUser.setSignUpMethod(provider);
                         userService.registerUser(newUser);
                         DefaultOAuth2User oauthUser = new DefaultOAuth2User(
                                 List.of(new SimpleGrantedAuthority(newUser.getRole().getRoleName().name())),
