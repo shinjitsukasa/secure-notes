@@ -223,7 +223,6 @@ public class AuthController {
         return ResponseEntity.ok("2FA disabled");
     }
 
-
     @PostMapping("/verify-2fa")
     public ResponseEntity<String> verify2FA(@RequestParam int code) {
         Long userId = authUtil.loggedInUserId();
@@ -237,7 +236,6 @@ public class AuthController {
         }
     }
 
-
     @GetMapping("/user/2fa-status")
     public ResponseEntity<?> get2FAStatus() {
         User user = authUtil.loggedInUser();
@@ -248,7 +246,6 @@ public class AuthController {
                     .body("User not found");
         }
     }
-
 
     @PostMapping("/public/verify-2fa-login")
     public ResponseEntity<String> verify2FALogin(@RequestParam int code,
@@ -262,5 +259,14 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid 2FA Code");
         }
+    }
+
+    @PostMapping("/update-credentials")
+    public ResponseEntity<String> updateCredentials(@RequestParam String password, String username) {
+        Long userId = authUtil.loggedInUserId();
+        userService.updatePassword(userId, password);
+        User user = authUtil.loggedInUser();
+        user.setUserName(username);
+        return ResponseEntity.ok("Credentials updated successfully");
     }
 }
