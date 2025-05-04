@@ -4,6 +4,7 @@ import com.secure.notes.dtos.UserDTO;
 import com.secure.notes.models.Role;
 import com.secure.notes.models.User;
 // import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
+import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public interface UserService {
 
     User registerUser(User user);
 
-    // GoogleAuthenticatorKey generate2FASecret(Long userId);
+    GoogleAuthenticatorKey generate2FASecret(Long userId);
 
     boolean validate2FACode(Long userId, int code);
 

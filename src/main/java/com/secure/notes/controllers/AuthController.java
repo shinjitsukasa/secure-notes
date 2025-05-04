@@ -36,8 +36,10 @@ import com.secure.notes.security.request.SignupRequest;
 import com.secure.notes.security.response.LoginResponse;
 import com.secure.notes.security.response.MessageResponse;
 import com.secure.notes.security.response.UserInfoResponse;
+import com.secure.notes.services.TotpService;
 import com.secure.notes.services.UserService;
 import com.secure.notes.util.AuthUtil;
+import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import jakarta.validation.Valid;
 
@@ -65,6 +67,9 @@ public class AuthController {
 
 	@Autowired
 	AuthUtil authUtil;
+
+    @Autowired
+    TotpService totpService;
 
 	@PostMapping("/public/signin")
 	public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -202,14 +207,14 @@ public class AuthController {
     }
 
     // 2FA Authentication
-   //  @PostMapping("/enable-2fa")
-   //  public ResponseEntity<String> enable2FA() {
-   //      Long userId = authUtil.loggedInUserId();
-   //      GoogleAuthenticatorKey secret = userService.generate2FASecret(userId);
-   //      String qrCodeUrl = totpService.getQrCodeUrl(secret,
-   //              userService.getUserById(userId).getUserName());
-   //      return ResponseEntity.ok(qrCodeUrl);
-   //  }
+    @PostMapping("/enable-2fa")
+    public ResponseEntity<String> enable2FA() {
+        Long userId = authUtil.loggedInUserId();
+        GoogleAuthenticatorKey secret = userService.generate2FASecret(userId);
+        String qrCodeUrl = totpService.getQrCodeUrl(secret,
+                userService.getUserById(userId).getUserName());
+        return ResponseEntity.ok(qrCodeUrl);
+    }
 
     @PostMapping("/disable-2fa")
     public ResponseEntity<String> disable2FA() {
