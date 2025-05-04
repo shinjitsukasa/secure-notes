@@ -3,7 +3,6 @@ package com.secure.notes.services;
 import com.secure.notes.dtos.UserDTO;
 import com.secure.notes.models.Role;
 import com.secure.notes.models.User;
-// import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import java.util.List;
