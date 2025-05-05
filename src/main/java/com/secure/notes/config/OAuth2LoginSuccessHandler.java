@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -140,6 +141,13 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 		newUser.setEmail(email);
 		newUser.setUserName(username);
 		newUser.setSignUpMethod(provider);
+		newUser.setTwoFactorEnabled(false);
+		newUser.setAccountNonLocked(true);
+		newUser.setAccountNonExpired(true);
+		newUser.setCredentialsNonExpired(true);
+		newUser.setEnabled(true);
+		newUser.setCredentialsExpiryDate(LocalDate.now().plusYears(1));
+		newUser.setAccountExpiryDate(LocalDate.now().plusYears(1));
 		userService.registerUser(newUser);
 
 		DefaultOAuth2User oauthUser = new DefaultOAuth2User(
