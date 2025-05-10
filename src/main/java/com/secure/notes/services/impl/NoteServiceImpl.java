@@ -6,6 +6,7 @@ import com.secure.notes.services.AuditLogService;
 import com.secure.notes.services.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,7 +18,8 @@ public class NoteServiceImpl implements NoteService {
 
     @Autowired
     private AuditLogService auditLogService;
-
+    
+    @Transactional
     @Override
     public Note createNoteForUser(String username, String content, String title) {
         Note note = new Note();
@@ -29,6 +31,7 @@ public class NoteServiceImpl implements NoteService {
         return savedNote;
     }
 
+    @Transactional
     @Override
     public Note updateNoteForUser(Long noteId, String title, String content, String username) {
         Note note = noteRepository.findById(noteId).orElseThrow(()
@@ -50,6 +53,7 @@ public class NoteServiceImpl implements NoteService {
         noteRepository.delete(note);
     }
 
+    @Transactional
     @Override
     public List<Note> getNotesForUser(String username) {
         List<Note> personalNotes = noteRepository
