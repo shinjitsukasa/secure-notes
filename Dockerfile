@@ -24,3 +24,4 @@ COPY --from=builder /app/notes/target/notes-0.0.1-SNAPSHOT.jar /app/notes-0.0.1-
 ENTRYPOINT ["java", "-jar", "-XX:MaxRAMPercentage=75", "-XX:MinRAMPercentage=25", "/app/notes-0.0.1-SNAPSHOT.jar"]
 
 # docker build -t notes-be .
+# docker save -o notes-be.tar notes-be

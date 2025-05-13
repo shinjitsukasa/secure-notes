@@ -11,6 +11,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -38,12 +41,17 @@ import org.springframework.boot.CommandLineRunner;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true,
-jsr250Enabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
-    
+
     @Value("${frontend.url}")
     private String frontendUrl;
+
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+    private String googleRedirectUri;
+
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
@@ -53,18 +61,9 @@ public class SecurityConfig {
     OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
-
-    @Bean
-    public RateLimitingFilter rateLimitingFilter() {
-        return new RateLimitingFilter();
-    }
-
-    @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+        http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers("/api/auth/public/**", "/api/csrf-token", "/oauth2/**"));
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all OPTIONS requests
                 .requestMatchers("/api/admin/**").hasAuthority(AppRole.ROLE_ADMIN.name())
@@ -73,6 +72,8 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/**").permitAll()
                 .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> {
+                    oauth2.authorizationEndpoint(authorization -> authorization
+                            .authorizationRequestResolver(customAuthorizationRequestResolver()));
                     oauth2.successHandler(oAuth2LoginSuccessHandler);
                 });
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler));
@@ -80,16 +81,41 @@ public class SecurityConfig {
         http.addFilterBefore((Filter) rateLimitingFilter(), UsernamePasswordAuthenticationFilter.class);
         http.cors(cors -> cors.configurationSource(request -> {
             org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-            config.setAllowedOrigins(List.of(frontendUrl)); // Allow frontend origin
+            config.setAllowedOrigins(
+                    List.of("https://notes.foodwarstech.uk", "http://192.168.10.118:3004", "http://localhost:3004")); // Allow
+                                                                                                                      // frontend
+                                                                                                                      // origin
             config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allow HTTP methods
-            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Allow required headers
-            config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Expose headers if needed
+            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Allow
+                                                                                                              // required
+                                                                                                              // headers
+            config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Expose headers if
+                                                                                              // needed
             config.setAllowCredentials(true); // Allow credentials (cookies, etc.)
             return config;
         }));
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();
+    }
+
+    private OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver() {
+        DefaultOAuth2AuthorizationRequestResolver resolver =
+                new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
+        resolver.setAuthorizationRequestCustomizer(customizer -> {
+            customizer.redirectUri(googleRedirectUri);
+        });
+        return resolver;
+    }
+
+    @Bean
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
+    }
+
+    @Bean
+    public RateLimitingFilter rateLimitingFilter() {
+        return new RateLimitingFilter();
     }
 
     @Bean
