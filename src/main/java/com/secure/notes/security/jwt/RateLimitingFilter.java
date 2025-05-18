@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ public class RateLimitingFilter implements Filter {
     private final Bucket bucket;
 
     public RateLimitingFilter() {
-        Bandwidth limit = Bandwidth.classic(10, Refill.greedy(250, Duration.ofMinutes(1))); // 10 requests per minute
+        Bandwidth limit = Bandwidth.classic(10, Refill.greedy(100, Duration.ofMinutes(1))); // 10 requests per minute
         this.bucket = Bucket.builder().addLimit(limit).build();
     }
 
