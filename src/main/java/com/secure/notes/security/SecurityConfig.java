@@ -100,8 +100,8 @@ public class SecurityConfig {
     }
 
     private OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver() {
-        DefaultOAuth2AuthorizationRequestResolver resolver =
-                new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
+        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, "/oauth2/authorization");
         resolver.setAuthorizationRequestCustomizer(customizer -> {
             customizer.redirectUri(googleRedirectUri);
         });
