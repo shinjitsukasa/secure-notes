@@ -82,15 +82,10 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(request -> {
             org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
             config.setAllowedOrigins(
-                    List.of("https://notes.foodwarstech.uk", "http://192.168.10.118:3004", "http://localhost:3004")); // Allow
-                                                                                                                      // frontend
-                                                                                                                      // origin
+                    List.of("https://notes.foodwarstech.uk", "http://192.168.10.118:3004", "http://localhost:3004")); // Allow frontend origin
             config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allow HTTP methods
-            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Allow
-                                                                                                              // required
-                                                                                                              // headers
-            config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Expose headers if
-                                                                                              // needed
+            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Allow required headers
+            config.setExposedHeaders(List.of("Authorization", "X-XSRF-TOKEN", "CSRF_TOKEN")); // Expose headers if needed
             config.setAllowCredentials(true); // Allow credentials (cookies, etc.)
             return config;
         }));
