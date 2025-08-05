@@ -40,3 +40,4 @@ application-*.properties
 application-*.yml
 application-*.yaml
 .env
+.env.example
