@@ -41,3 +41,4 @@ application-*.yml
 application-*.yaml
 .env
 .env.example
+notes-be-build.bat
