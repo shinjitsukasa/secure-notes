@@ -17,12 +17,7 @@ public class EmailService {
 
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            try {
-                helper.setTo(to);
-            } catch (jakarta.mail.MessagingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            helper.setTo(to);
             helper.setSubject("Password Reset Request");
 
             // HTML content with inline CSS
@@ -85,8 +80,7 @@ public class EmailService {
         } catch (MailException e) {
             throw new RuntimeException("Failed to send email", e);
         } catch (jakarta.mail.MessagingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException("Failed to create email message", e);
         }
     }
 }

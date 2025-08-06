@@ -2,7 +2,7 @@ package com.secure.notes.security.jwt;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
+// import io.github.bucket4j.Refill;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.Filter;
@@ -19,7 +19,10 @@ public class RateLimitingFilter implements Filter {
     private final Bucket bucket;
 
     public RateLimitingFilter() {
-        Bandwidth limit = Bandwidth.classic(10, Refill.greedy(100, Duration.ofMinutes(1))); // 10 requests per minute
+        Bandwidth limit = Bandwidth.builder()
+            .capacity(10)
+            .refillGreedy(10, Duration.ofMinutes(1))
+            .build();
         this.bucket = Bucket.builder().addLimit(limit).build();
     }
 
